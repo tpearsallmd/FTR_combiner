@@ -1,2 +1,5 @@
 # Sample data - do not commit case/hearing files
 SampleData/
+
+# Compiled executable — build locally from the PowerShell source
+*.exe

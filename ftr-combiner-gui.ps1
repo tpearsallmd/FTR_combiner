@@ -1,3 +1,20 @@
+<#
+.SYNOPSIS
+    Combines multiple FTR .trm audio recording files into a single file.
+
+.DESCRIPTION
+    FTR (For The Record) recording systems split court sessions into many
+    small .trm files. This GUI tool merges them into one file in the correct
+    playback order so the full session can be processed by audio transcription
+    tools without handling each segment individually.
+
+    File ordering is determined by the .trs session metadata file when present
+    (authoritative), or by the timestamp embedded in each filename as a fallback.
+
+.NOTES
+    Requires: Windows PowerShell 5.1 or PowerShell 7+ on Windows
+    UI framework: Windows Forms (Windows only)
+#>
 #Requires -Version 5.0
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
@@ -5,6 +22,18 @@ Add-Type -AssemblyName System.Drawing
 #region ── Helpers ───────────────────────────────────────────────────────────
 
 function Get-OrderedTrmFiles {
+<#
+    .SYNOPSIS
+        Returns .trm file paths from a folder in the correct playback order.
+    .DESCRIPTION
+        Reads the .trs XML metadata file to get the authoritative MediaFiles
+        sequence. Falls back to alphabetical sort of filenames, which works
+        because FTR embeds a YYYYMMDD-HHMM timestamp at the start of each name.
+    .PARAMETER FolderPath
+        Path to the folder containing .trm (and optionally .trs) files.
+    .OUTPUTS
+        System.String[] — ordered array of full file paths.
+#>
     param([string]$FolderPath)
 
     # Prefer .trs file ordering (authoritative MediaFiles sequence)
@@ -37,6 +66,22 @@ function Format-FileSize {
 }
 
 function Combine-TrmFiles {
+<#
+    .SYNOPSIS
+        Concatenates an ordered list of .trm files into a single output file.
+    .DESCRIPTION
+        Streams each source file into the output in 1 MB chunks, updating the
+        progress bar and status label as each file is written. Cleans up the
+        partial output file if an error occurs mid-combine.
+    .PARAMETER SourceFiles
+        Ordered array of full paths to the .trm files to combine.
+    .PARAMETER OutputPath
+        Full path for the combined output .trm file.
+    .PARAMETER ProgressBar
+        Windows Forms ProgressBar control to update during the operation.
+    .PARAMETER StatusLabel
+        Windows Forms Label control to display the current filename being written.
+#>
     param(
         [string[]]$SourceFiles,
         [string]$OutputPath,

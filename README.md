@@ -8,15 +8,49 @@ FTR recording systems commonly split a single court session across many small `.
 
 ## Requirements
 
-- Windows 10 or later
+- Windows 10 or Windows 11
+- **Windows PowerShell 5.1** (built into Windows 10/11 — no installation needed), **or PowerShell 7+** on Windows
+
+> No compiled executable is distributed in this repo. Running the PowerShell script directly is the simplest option; building an `.exe` is optional and covered below.
 
 ## Usage
 
-1. Run `ftr-combiner.exe`
-2. Click **Browse** and select the folder containing your `.trm` files
-3. The tool will display the files in the correct playback order
-4. Choose an output location (a suggested filename is pre-filled)
-5. Click **Combine Files**
+### Option 1 — Run the script directly (recommended)
+
+Open PowerShell and run:
+
+```powershell
+.\ftr-combiner-gui.ps1
+```
+
+If your execution policy blocks scripts, allow it for the current session first:
+
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+.\ftr-combiner-gui.ps1
+```
+
+### Option 2 — Build a standalone executable
+
+If you prefer a double-clickable `.exe`, compile it yourself using [ps2exe](https://github.com/MScholtes/PS2EXE):
+
+```powershell
+# Install ps2exe if you haven't already
+Install-Module ps2exe -Scope CurrentUser
+
+# Allow scripts for this session, then compile
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+Invoke-ps2exe .\ftr-combiner-gui.ps1 .\ftr-combiner.exe -noConsole
+```
+
+The resulting `ftr-combiner.exe` can be run on any Windows 10/11 machine without PowerShell being visible to the user.
+
+## Using the tool
+
+1. Click **Browse** and select the folder containing your `.trm` files
+2. The tool displays the files in the correct playback order
+3. Choose an output location (a suggested filename is pre-filled)
+4. Click **Combine Files**
 
 The combined `.trm` file can then be loaded into any transcription tool that supports the FTR format.
 
@@ -26,26 +60,3 @@ FTR Combiner determines the correct file order using the following logic:
 
 - **Primary:** reads the `.trs` metadata file in the source folder, which contains the authoritative sequence of media files for the session
 - **Fallback:** if no `.trs` file is present, files are sorted by the timestamp embedded in their filenames (`YYYYMMDD-HHMM_...`)
-
-## Running from Source
-
-If you prefer to run the PowerShell script directly instead of the compiled executable:
-
-```powershell
-.\ftr-combiner-gui.ps1
-```
-
-You may need to allow script execution for the current session first:
-
-```powershell
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-```
-
-## Building the Executable
-
-The `.exe` is compiled from the PowerShell script using [ps2exe](https://github.com/MScholtes/PS2EXE).
-
-```powershell
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-Invoke-ps2exe .\ftr-combiner-gui.ps1 .\ftr-combiner.exe -noConsole
-```
